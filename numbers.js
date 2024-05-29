@@ -1,40 +1,61 @@
-const UL = document.querySelector('ul')
+const multipleNumbers = document.getElementById('multiple-numbers')
+const multipleFacts = document.getElementById('multiple-facts')
 const BASEURL = ' http://numbersapi.com';
 const favNum = 13;
 const MIN = 7;
 const MAX = 12;
 
-function getFavNumberFact() {
-    let trivia = axios.get(`${BASEURL}/${favNum}`, {params: {json: true}})
-    return trivia
+// Async Fav number fact
+async function getFavNumberFact() {
+    try {
+        let trivia = await axios.get(`${BASEURL}/${favNum}`, {params: {json: true}})
+        console.log('Favorite number fact:')
+        console.log(trivia.data.text)
+        return trivia.data.text
+    } catch (e) {
+        console.log(e)
+        return e
+    }
+
 }
 
-// My fav number
 getFavNumberFact()
-    .then(res => {
-        console.log('Favorite number fact:')
-        console.log(res.data.text)
-    })
-    .catch(err => console.log(err))
 
 // Multiple numbers in a single query
-let multipleTrivia = axios.get(`${BASEURL}/${MIN}..${MAX}`, {params: {json: true}})
 
-multipleTrivia
-    .then(res => {
+async function getMultipleNumbersTrivia() {
+    try {
+        let res = await axios.get(`${BASEURL}/${MIN}..${MAX}`, {params: {json: true}})
         console.log('Facts about multiple numbers:')
         console.log(res.data)
-    })
-    .catch(err => console.log(err))
+        console.log(typeof res.data)
+        for (const num in res.data) {
+            const number = document.createElement('li');
+            number.innerText = res.data[num];
+            multipleNumbers.append(number)
+        }
+    } catch (e){
+        console.log(e)
+    }
 
-// Multiple facts about my fav number
-for (let i = 0; i < 4; i++) {
-    const fact = getFavNumberFact()
-        .then(res => {
-            const fact = document.createElement('li');
-            fact.innerText = res.data.text;
-            UL.append(fact)
-
-        })
-        .catch(err => console.log(err))
 }
+
+getMultipleNumbersTrivia()
+
+
+async function getMultipleFacts() {
+    const facts = []
+    for (let i = 0; i < 4; i++) {
+        const fact =  axios.get(`${BASEURL}/${favNum}`, {params: {json: true}})
+        facts.push(fact)
+    }
+
+    for (const fact of facts) {
+        const text = await fact;
+        const factElement = document.createElement('li');
+        factElement.innerText = text.data.text
+        multipleFacts.append(factElement)
+    }
+}
+
+getMultipleFacts()
